@@ -1,18 +1,10 @@
 docs:
   extended_description: |
-    Query Power BI Semantic Models from DuckDB using DAX/XMLA.
+    Query Power BI Semantic Models from DuckDB using DAX via XMLA endpoint.
 
     The extension has no required external runtime dependency libraries beyond DuckDB extensions you choose to use (for example, `azure` for secret-based auth).
 
-    `dax_query` executes DAX and returns results as DuckDB tables. `pbi_tables`, `pbi_columns`, `pbi_measures`, and `pbi_relationships` expose INFO.VIEW metadata for model exploration.
-
-    The easiest way to get started is Azure CLI auth (`az login`) with `SET pbi_scanner_auth_mode = 'azure_cli'`, but Azure CLI is not required.
-
-    You can also authenticate with DuckDB Azure secrets from the `azure` extension, either by:
-    - setting `Secret=<name>` in the connection string, or
-    - passing `secret_name := '<name>'` as a named parameter.
-
-    Replace workspace and semantic model placeholders with values you can access.
+    Please visit the [extension repository](https://github.com/crazy-treyn/pbi_scanner) for more details and examples.
   hello_world: |
     INSTALL pbi_scanner FROM community;
     LOAD pbi_scanner;
