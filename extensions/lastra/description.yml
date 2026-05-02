@@ -1,0 +1,28 @@
+extension:
+  name: lastra
+  description: Reader for the Lastra columnar time-series format
+  version: 0.1.1
+  language: C++
+  build: cmake
+  license: Apache-2.0
+  maintainers:
+    - mrmx
+
+repo:
+  github: QTSurfer/duckdb-lastra
+  ref: ddc821958e10fdef844fb2ac6549eb44a51a3ae7
+
+docs:
+  hello_world: |
+    SELECT * FROM read_lastra('data.lastra') LIMIT 10;
+  extended_description: |
+    Reads Lastra (.lastra) columnar time-series files with per-column codec
+    selection. Designed for financial tick data (OHLCV), IoT sensor readings,
+    and strategy execution results.
+
+    Supported codecs: ALP (adaptive lossless floating-point), Gorilla (XOR),
+    Pongo (decimal-aware), delta-varint (timestamps), ZSTD (binary).
+
+    Features row groups with per-group timestamp statistics for efficient
+    temporal range queries — only row groups overlapping the WHERE clause
+    are decoded.

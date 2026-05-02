@@ -10,7 +10,7 @@ extension:
 
 repo:
   github: ahuarte47/duckdb-eeagrid
-  ref: f5da6388c0b50ea8436040ce28c82c0b65e953d9
+  ref: 55c15fe37f81eac3fac8f8cb3cc612d1380de61d
 
 docs:
   hello_world: |

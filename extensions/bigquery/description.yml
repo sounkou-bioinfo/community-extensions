@@ -1,19 +1,20 @@
 extension:
   name: bigquery
   description: Integrates DuckDB with Google BigQuery, allowing direct querying and management of BigQuery datasets
-  version: 0.6.3
+  version: 0.9.0
   language: C++
   build: cmake
   license: MIT
-  excluded_platforms: "wasm_mvp;wasm_eh;wasm_threads;windows_amd64_mingw"
   vcpkg_commit: "ef7dbf94b9198bc58f45951adcf1f041fcbc5ea0"
   requires_toolchains: "parser_tools"
+  excluded_platforms: "wasm_mvp;wasm_eh;wasm_threads;windows_amd64_mingw"
   maintainers:
     - hafenkran
 
 repo:
   github: hafenkran/duckdb-bigquery
-  ref: a59a495035e6bc48e739539c93f59f5a656c0358
+  andium: ec5cf7b0342e7a46f7505c1176d8e46d963d7815
+  ref: c18ffbd5063b1b20ff71943dbcf3997ea3134b25
 
 docs:
   hello_world: |
@@ -27,7 +28,7 @@ docs:
     │ varchar  │     varchar      │  varchar │  varchar[]   │     varchar[]     │  boolean  │
     ├──────────┼──────────────────┼──────────┼──────────────┼───────────────────┼───────────┤
     │ bq       │ quacking_dataset │ duck_tbl │ [i, s]       │ [BIGINT, VARCHAR] │ false     │
-    | bq       | barking_dataset  | dog_tbl  | [i, s]       | [BIGINT, VARCHAR] │ false     |
+    | bq       | barking_dataset  | dog_tbl  | [i, s]       | [BIGINT, VARCHAR] │ false     │
     └──────────┴──────────────────┴──────────┴──────────────┴───────────────────┴───────────┘
 
     -- Select data from a specific table in BigQuery
