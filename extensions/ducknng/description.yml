@@ -11,7 +11,7 @@ extension:
 
 repo:
   github: "sounkou-bioinfo/ducknng"
-  ref: "5b2641d105e0d9561f57589d732847133c7801ae"
+  ref: "cf9b082b187c63f510d2ed39fe40ba8bed109140"
 
 docs:
   hello_world: |
