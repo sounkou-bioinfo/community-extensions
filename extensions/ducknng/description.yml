@@ -11,7 +11,7 @@ extension:
 
 repo:
   github: "sounkou-bioinfo/ducknng"
-  ref: "a0296cbff1f136f884a50d785562a19551a19654"
+  ref: "5b2641d105e0d9561f57589d732847133c7801ae"
 
 docs:
   hello_world: |
@@ -116,6 +116,19 @@ docs:
     - `ducknng_list_http_routes()`: List the currently registered HTTP routes across running services, including their match kind and stored path pattern.
     - `ducknng_http_request()`: Expose the current HTTP request context while SQL runs inside an active route handler.
     - `ducknng_http_request_body()`: Expose the current HTTP request body while SQL runs inside an active route handler.
+    - `ducknng_http_headers_get(headers_json, name)`: Return one header value from ducknng's canonical HTTP header JSON.
+    - `ducknng_http_headers_build(names, values)`: Build ducknng's canonical HTTP header JSON from parallel name and value lists.
+    - `ducknng_http_query_param_get(query_string, name)`: Return one decoded query-string parameter value.
+    - `ducknng_http_cookie_get(cookie_header, name)`: Return one cookie value from a Cookie header string.
+    - `ducknng_http_path_params_get(path_params_json, name)`: Return one template-route path parameter from path_params_json.
+    - `ducknng_http_header(name)`: Route-local shortcut for reading one request header by name.
+    - `ducknng_http_query_param(name)`: Route-local shortcut for reading one decoded query parameter by name.
+    - `ducknng_http_cookie(name)`: Route-local shortcut for reading one request cookie by name.
+    - `ducknng_http_path_param(name)`: Route-local shortcut for reading one template path parameter by name.
+    - `ducknng_http_response(status, headers_json, content_type, body, body_text)`: Build the one-row response shape expected by a route handler.
+    - `ducknng_http_text(status, body_text)`: Build a one-row plain-text HTTP route response.
+    - `ducknng_http_json(status, body_text)`: Build a one-row JSON HTTP route response from a text body.
+    - `ducknng_http_binary(status, body)`: Build a one-row binary HTTP route response.
     
     ### Async I/O
     - `ducknng_request_raw_aio(url, frame, timeout_ms, tls_config_id)`: Launch one raw req/rep roundtrip asynchronously and return a future-like aio handle id.
