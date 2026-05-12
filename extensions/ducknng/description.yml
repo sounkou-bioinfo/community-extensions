@@ -1,7 +1,7 @@
 extension:
   name: "ducknng"
-  description: "DuckDB extension exposing DuckDB SQL and manifest-declared RPC over NNG and HTTP with Arrow IPC payloads"
-  version: "0.1.0"
+  description: "\"Pure C DuckDB extension exposing a DuckDB-backed SQL and RPC server over NNG using Arrow IPC — with framed RPC, custom HTTP routes, TLS support, body codec layer, and admission controls\""
+  version: "0.1.1"
   language: "C"
   build: "cmake"
   license: "MIT"
@@ -11,7 +11,7 @@ extension:
 
 repo:
   github: "sounkou-bioinfo/ducknng"
-  ref: "8be006d8d9bf1f6caaff8ea0050531151ca54c69"
+  ref: "8dbf0738b4c6f07208174b4245ceafb79638ccb7"
 
 docs:
   hello_world: |
@@ -44,12 +44,16 @@ docs:
     ### Service Control
     - `ducknng_start_server(name, listen, contexts, recv_max_bytes, session_idle_ms, tls_config_id[, ip_allowlist_json])`: Start a named ducknng service and choose the carrier from the listen URL scheme.
     - `ducknng_stop_server(name)`: Stop a named ducknng service.
+    - `ducknng_service_inflight(name)`: Return the current in-flight request count for a named service. Re-evaluated on every call, making it suitable for use inside recursive poll CTEs.
+    - `ducknng_set_service_execution_model(name, model)`: Set the DuckDB connection execution model used by service-side SQL.
     
     ### Introspection
     - `ducknng_list_servers()`: List registered ducknng services.
     - `ducknng_read_monitor(name, after_seq, max_events)`: Read the bounded per-service NNG pipe monitor event stream.
     - `ducknng_monitor_status(name)`: Return pipe monitor ring status and active-pipe counters for a running service.
     - `ducknng_list_pipes(name)`: List currently active NNG pipes for a running service.
+    - `ducknng_log_entries()`: Return a snapshot of the most recent DuckDB log entries captured by the ducknng log ring.
+    - `ducknng_enable_log_capture()`: Wire the ducknng log ring into DuckDB's internal logger so that DuckDB log entries are captured and visible through ducknng_log_entries(). Returns TRUE if capture is active after the call, FALSE if registration failed. Safe to call multiple times.
     
     ### Method Registry
     - `ducknng_register_exec_method([requires_auth])`: Register the built-in exec RPC method explicitly.
@@ -89,7 +93,7 @@ docs:
     - `ducknng_set_tls_peer_allowlist(tls_config_id, identities_json)`: Set the default exact peer-identity allowlist on a TLS config handle.
     - `ducknng_set_service_peer_allowlist(name, identities_json)`: Dynamically set the exact peer-identity allowlist for a running service.
     - `ducknng_set_service_ip_allowlist(name, cidrs_json)`: Dynamically set the IP/CIDR remote-address allowlist for a running service.
-    - `ducknng_set_service_limits(name, max_open_sessions[, max_active_pipes[, max_inflight_requests[, max_sessions_per_peer_identity]]])`: Set service resource limits.
+    - `ducknng_set_service_limits(name, max_open_sessions[, max_active_pipes[, max_inflight_requests[, max_sessions_per_peer_identity[, max_inflight_per_principal[, max_reply_bytes_per_principal[, max_session_open_rate_per_principal]]]]]])`: Set service resource limits.
     - `ducknng_auth_context()`: Expose the current request context to a SQL authorization callback.
     - `ducknng_set_service_authorizer(name, authorizer_sql)`: Install or clear a service-level SQL authorization callback evaluated uniformly for framed RPC requests before method dispatch.
     - `ducknng_self_signed_tls_config(common_name, valid_days, auth_mode)`: Generate a self-signed development certificate and register it as a TLS config handle.
@@ -114,6 +118,13 @@ docs:
     - `ducknng_unregister_http_route(service_name, method, path)`: Remove one previously registered exact-path HTTP route from a service.
     - `ducknng_unregister_http_route_pattern(service_name, method, match_kind, path_pattern)`: Remove one previously registered prefix, template, or explicit exact route pattern from a service.
     - `ducknng_list_http_routes()`: List the currently registered HTTP routes across running services, including their match kind and stored path pattern.
+    - `ducknng_set_http_route_auth(service_name, method, path[, require_identity[, allow_identities_json]])`: Set authentication requirements on a registered HTTP route.
+    - `ducknng_register_http_static(service_name, path_prefix, dir_path)`: Register a prefix route that serves static files from a directory on the server filesystem.
+    - `ducknng_register_http_worker(service_name, worker_name, sql, interval_ms)`: Register a background SQL worker that runs on a recurring interval while the HTTP service is active.
+    - `ducknng_unregister_http_worker(service_name, worker_name)`: Unregister a previously registered HTTP background worker.
+    - `ducknng_list_http_workers()`: List all currently registered HTTP background workers across running services.
+    - `ducknng_http_ndjson(status, body_text)`: Convenience table macro for returning an NDJSON HTTP response from a route handler.
+    - `ducknng_http_sse(status, body_text)`: Convenience table macro for returning a Server-Sent Events HTTP response from a route handler.
     - `ducknng_http_request()`: Expose the current HTTP request context while SQL runs inside an active route handler.
     - `ducknng_http_request_body()`: Expose the current HTTP request body while SQL runs inside an active route handler.
     - `ducknng_http_headers_get(headers_json, name)`: Return one header value from ducknng's canonical HTTP header JSON.
@@ -171,7 +182,8 @@ docs:
     - Transport family is chosen by URL scheme. Supported listeners and clients cover inproc://, ipc://, tcp://, tls+tcp://, ws://, wss://, http://, and https:// where applicable.
     - Arrow IPC is the normal row payload format. JSON is used for manifest documents and lightweight control metadata.
     - Query sessions are explicit (`query_open`, `fetch`, `close`, `cancel`) and raw/session aio helpers follow the same future-like async contract through `nng_aio` handles.
-    - The current server-side DuckDB execution model is `shared_serialized_connection`: query sessions are explicit RPC state, while service-owned DuckDB SQL is serialized through one shared backend connection.
+    - Expected aio launch failures return immediate terminal error handles so callers inspect errors through aio status or collect helpers instead of catching DuckDB exceptions.
+    - The default server-side DuckDB execution model is `shared_serialized_connection`; services may switch to `service_serialized_connection` or `request_connection` with ducknng_set_service_execution_model().
     - TLS configuration can come from filesystem paths, in-memory PEM content, or self-signed development helpers.
     - The HTTP route layer is intentionally primitive and extensible; downstream users can build tenant routing, worker orchestration, and other control-plane logic without `ducknng` sealing those policies into the core extension.
     - Current excluded platforms are wasm and Windows.
